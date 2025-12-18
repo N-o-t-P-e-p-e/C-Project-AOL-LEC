@@ -82,7 +82,7 @@ void Display()
     scanf("%d", &rows);
 
     // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char *path = "Data\\DummyData.csv";
+    char path[] = "Data\\DummyData.csv";
 
     // Membuka file dengan fungsi fopen yang merujuk pada path data dengan mode akses "r" atau "read".
     FILE *file = fopen(path, "r");
@@ -94,8 +94,8 @@ void Display()
         return;
     }
     
-    // Buffer bisa dikatakan sebagai satu baris yang akan kita ambil dalam scanning baris nanti.
-    char buffer[1024];
+    // Satu baris yang akan kita ambil dalam scanning baris nanti.
+    char line[1024];
     // Variabel count digunakan untuk menghitung berapa baris yang sudah ditampilkan, nanti akan dicocokkan dengan rows yang sudah di input.
     int count = 0;
 
@@ -103,16 +103,16 @@ void Display()
     printf("\n%-20s %-15s %-10s %-6s %10s %-10s %-10s %-10s\n", "Location", "City", "Price", "Rooms", "Bathrooms", "Carpark", "Type", "Furnish");
 
     // FIX!! Metode yang berguna untuk tidak mengambil header yang ada dalam file csv! (KALAU DIHAPUS HEADER AKAN DIPRINT DAN OUTPUT BISA KACAU).
-    fgets(buffer, sizeof(buffer), file);
+    fgets(line, sizeof(line), file);
     
     // Perulangan untuk menampilkan data. Jika masih terdapat baris pada file dan juga selama count tidak melebihi jumlah rows yang diminta.
-    while (fgets(buffer, sizeof(buffer), file) != NULL && count < rows)
+    while (fgets(line, sizeof(line), file) != NULL && count < rows)
     {
         // Memanggil struct property. Tujuannya data yang sudah discan akan dipindahkan ke variabel 'sementara' yang ada di struct.
         Property prop;
         
         // Melakukan scanning data yang ada di file csv. Data dipecah/dipisahkan berdasarkan koma (sesuai format yang ada di dalam file csv). Kemudian data akan dipassing ke variabel yang diinisialisasi di dalam struct.
-        sscanf(buffer, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop.location, prop.city, &prop.price, &prop.rooms, &prop.bathrooms, &prop.carpark, prop.type, prop.furnish);
+        sscanf(line, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop.location, prop.city, &prop.price, &prop.rooms, &prop.bathrooms, &prop.carpark, prop.type, prop.furnish);
 
         // Menampilkan data yang sudah di passing ke dalam struct kemudian diformat dalam bentuk tabel.
         printf("%-20s %-15s %-10d %-7d %-9d %-10d %-10s %-10s\n", prop.location, prop.city, prop.price, prop.rooms, prop.bathrooms, prop.carpark, prop.type, prop.furnish);
@@ -152,7 +152,7 @@ void SelectRow()
     scanf("%s", data);
 
     // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char *path = "Data\\DummyData.csv";
+    char path[] = "Data\\DummyData.csv";
 
     // Membuka file dengan fungsi fopen yang merujuk pada path data dengan mode akses "r" atau "read".
     FILE *file = fopen(path, "r");
@@ -164,46 +164,56 @@ void SelectRow()
         return;
     }
 
-    // Buffer bisa dikatakan sebagai satu baris yang akan kita ambil dalam scanning baris nanti.
-    char buffer[1024];
+    // Satu baris yang akan kita ambil dalam scanning baris nanti.
+    char line[1024];
     // Variabel yang berguna untuk menyimpan nilai boolean terkait apakah data berhasil ditemukan.
     int found = 0;
 
     // FIX!! Metode yang berguna untuk tidak mengambil header yang ada dalam file csv! (KALAU DIHAPUS HEADER AKAN DIPRINT DAN OUTPUT BISA KACAU).
-    fgets(buffer, sizeof(buffer), file);
+    fgets(line, sizeof(line), file);
 
     // Suppaya rapi. :)
     printf("\n");
 
     // Perulangan untuk menampilkan data. Jika masih terdapat baris pada file.
-    while (fgets(buffer, sizeof(buffer), file) != NULL)
+    while (fgets(line, sizeof(line), file) != NULL)
     {
         // Memanggil struct property. Tujuannya data yang sudah discan akan dipindahkan ke variabel 'sementara' yang ada di struct.
         Property prop;
         // Membuat variabel target data, defaultnya adalah NULL atau tidak ada.
         char *target = NULL;
+        // Membuat variabel target data namun kali ini untuk tipe data integer, defaultnya adalah 0.
+        int targetInt = 0;
 
         // Melakukan scanning data yang ada di file csv. Data dipecah/dipisahkan berdasarkan koma (sesuai format yang ada di dalam file csv). Kemudian data akan dipassing ke variabel yang diinisialisasi di dalam struct.
-        sscanf(buffer, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop.location, prop.city, &prop.price, &prop.rooms, &prop.bathrooms, &prop.carpark, prop.type, prop.furnish);
+        sscanf(line, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop.location, prop.city, &prop.price, &prop.rooms, &prop.bathrooms, &prop.carpark, prop.type, prop.furnish);
 
         // Melalukan comparing column yang diminta user apakah cocok dengan column yang ada di data csv.
         if(strcmp(option, "Location") == 0)
-            // Jika column memang ada dalam data csv, maka jadikan variabel struct sebagai target data yang ditampilkan.
+            // Jika column memang ada dalam data csv, maka jadikan nilai yang ada variabel struct sebagai target data yang ditampilkan nanti.
             target = prop.location;
         else if(strcmp(option, "City") == 0)
             target = prop.city;
+        else if(strcmp(option, "Price") == 0)
+            targetInt = prop.price;
+        else if(strcmp(option, "Rooms") == 0)
+            targetInt = prop.rooms;
+        else if(strcmp(option, "Bathrooms") == 0)
+            targetInt = prop.bathrooms;
+        else if(strcmp(option, "Carpark") == 0)
+            targetInt = prop.carpark;
         else if(strcmp(option, "Type") == 0)
             target = prop.type;
         else if(strcmp(option, "Furnish") == 0)
             target = prop.furnish;
 
-        // Jika targetnya bukan NULL dan data yang ditarget susuai dengan data yang dicaru user.
-        if(target && strcmp(target, data) == 0)
+        // Jika targetnya memang ada dan data yang ditarget itu susuai dengan data yang diminta user maka lanjutkan.
+        if((target && strcmp(target, data) == 0) || (targetInt && targetInt == atoi(data)))
         {
-            // Dan jika data tidak ditemukan. (Cukup tampilkan judul dan header tabelnya saja dulu)
+            // Karena data sudah ditemukan belum dilabelkan sebagai "ditemukan", maka tampilkan judulnya terlebih dahulu. Hal ini dilakukan agar judul tidak terus menerus ditampilkan setiap kali data ditemukan.
             if(!found)
             {
-                // Maka tampilkan dalam format tabel (judul dan header).
+                // Tampilkan judul dan header sebagai bentuk format tabel.
                 printf("Data found. Detail of data:\n\n");
                 printf("%-20s %-15s %-10s %-6s %10s %-10s %-10s %-10s\n", "Location", "City", "Price", "Rooms", "Bathrooms", "Carpark", "Type", "Furnish");
             }
@@ -211,6 +221,7 @@ void SelectRow()
             // Tampilkan data dalam format tabel.
             printf("%-20s %-15s %-10d %-7d %-9d %-10d %-10s %-10s\n", prop.location, prop.city, prop.price, prop.rooms, prop.bathrooms, prop.carpark, prop.type, prop.furnish);
 
+            // Labelkan bahwa data sudah ditemukan.
             found = 1;
         }
     }
@@ -250,7 +261,7 @@ void SortBy()
     scanf("%s", order);
 
     // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char *path = "Data\\DummyData.csv";
+    char path[] = "Data\\DummyData.csv";
 
     // Membuka file dengan fungsi fopen yang merujuk pada path data dengan mode akses "r" atau "read".
     FILE *file = fopen(path, "r");
@@ -263,44 +274,51 @@ void SortBy()
     }
 
     // Array of struct Property untuk menyimpan data sementara sebelum diurutkan.
-    // Analoginya, semua data yang di scan nanti akan dimasukkan dan disimpan dalam array of struct ini, baru kemudian isi array itu baru diurutkan sesuai permintaan user.
+    // Analoginya, semua data yang di scan nanti akan dimasukkan dan disimpan dalam array of struct ini terlebih dahulu, baru kemudian isi array itu baru diurutkan sesuai permintaan user.
     Property prop[10000];
 
     // Variabel n untuk menghitung jumlah data yang ada atau data yang sedang diproses.
     int n = 0;
 
-    // Buffer bisa dikatakan sebagai satu baris yang akan kita ambil dalam scanning baris nanti.
-    char buffer[1024];
+    // Satu baris yang akan kita ambil dalam scanning baris nanti.
+    char line[1024];
 
     // FIX!! Metode yang berguna untuk tidak mengambil header yang ada dalam file csv! (KALAU DIHAPUS HEADER AKAN DIPRINT DAN OUTPUT BISA KACAU).
-    fgets(buffer, sizeof(buffer), file);
+    fgets(line, sizeof(line), file);
 
     // Perulangan untuk menampilkan data. Jika masih terdapat baris pada file maka perulangan akan terus berjalan.
-    while (fgets(buffer, sizeof(buffer), file) != NULL)
+    while (fgets(line, sizeof(line), file) != NULL)
     {
         // Melakukan scanning data yang ada di file csv. Data dipecah/dipisahkan berdasarkan koma (sesuai format yang ada di dalam file csv). Kemudian data akan dipassing ke variabel yang diinisialisasi di dalam struct.
-        sscanf(buffer, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop[n].location, prop[n].city, &prop[n].price, &prop[n].rooms, &prop[n].bathrooms, &prop[n].carpark, prop[n].type, prop[n].furnish);
+        sscanf(line, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop[n].location, prop[n].city, &prop[n].price, &prop[n].rooms, &prop[n].bathrooms, &prop[n].carpark, prop[n].type, prop[n].furnish);
 
         // Jumlah data bertambah setiap kali ada data yang berhasil discan.
         n++;
     }
 
-    // Tutup file setelah dibuka dan digunakan.
+    // Tutup file setelah dibuka dan digunakan. (Semua data sudah dipindah ke array, kemudian baru di sorting).
     fclose(file);
 
-    // Algoritma Bubble Sort untuk mengurutkan data berdasarkan column dan order yang diminta user.
+    // Algoritma Bubble Sort untuk mengurutkan data berdasarkan column dan order (ascending/descending) yang diminta user.
     for(int i = 0; i < n-1; i++)
     {
         for(int j = 0; j < n-i-1; j++)
         {
-            // Variabel swap berupa boolean untuk menandai apakah perlu menukar posisi data atau tidak.
+            // Variabel berupa boolean untuk menandai apakah perlu menukar posisi data atau tidak.
             int swap = 0;
 
             // Membandingkan column yang diminta user untuk diurutkan.
-            if(strcmp(column, "Price") == 0)
+            if (strcmp(column, "Location") == 0)
                 // Membandingkan order yang diminta user untuk mengurutkan data. (Menggunakan ternary operator).
-                // Jika ascending maka bandingkan apakah data saat ini lebih besar dari data selanjutnya.
-                // Jika descending maka bandingkan apakah data saat ini lebih kecil dari data selanjutnya.
+                // Jika ascending maka bandingkan apakah data saat ini yang mana berupa string lebih besar dari data selanjutnya. (Membandingkan dengan nilai ASCII).
+                // Jika descending maka bandingkan apakah data saat ini yang mana berupa string lebih kecil dari data selanjutnya. (Membandingkan dengan nilai ASCII).
+                swap = (strcmp(order, "asc") == 0) ? (strcmp(prop[j].location, prop[j+1].location) > 0) : (strcmp(prop[j].location, prop[j+1].location) < 0);
+            else if(strcmp(column, "City") == 0)
+                swap = (strcmp(order, "asc") == 0) ? (strcmp(prop[j].city, prop[j+1].city) > 0) : (strcmp(prop[j].city, prop[j+1].city) < 0);
+            else if(strcmp(column, "Price") == 0)
+                // Membandingkan order yang diminta user untuk mengurutkan data. (Menggunakan ternary operator).
+                // Jika ascending maka bandingkan apakah data saat ini lebih besar dari data selanjutnya. (Membandingkan berdasarkan besaran angka).
+                // Jika descending maka bandingkan apakah data saat ini lebih kecil dari data selanjutnya. (Membandingkan berdasarkan besaran angka).
                 swap = (strcmp(order, "asc") == 0) ? (prop[j].price > prop[j+1].price) : (prop[j].price < prop[j+1].price);
             else if(strcmp(column, "Rooms") == 0)
                 swap = (strcmp(order, "asc") == 0) ? (prop[j].rooms > prop[j+1].rooms) : (prop[j].rooms < prop[j+1].rooms);
@@ -308,6 +326,10 @@ void SortBy()
                 swap = (strcmp(order, "asc") == 0) ? (prop[j].bathrooms > prop[j+1].bathrooms) : (prop[j].bathrooms < prop[j+1].bathrooms);
             else if(strcmp(column, "Carpark") == 0)
                 swap = (strcmp(order, "asc") == 0) ? (prop[j].carpark > prop[j+1].carpark) : (prop[j].carpark < prop[j+1].carpark);
+            else if(strcmp(column, "Type") == 0)
+                swap = (strcmp(order, "asc") == 0) ? (strcmp(prop[j].type, prop[j+1].type) > 0) : (strcmp(prop[j].type, prop[j+1].type) < 0);
+            else if(strcmp(column, "Furnish") == 0) 
+                swap = (strcmp(order, "asc") == 0) ? (strcmp(prop[j].furnish, prop[j+1].furnish) > 0) : (strcmp(prop[j].furnish, prop[j+1].furnish) < 0);
 
             // Jika perlu menukar posisi data, maka lakukan penukaran posisi data.
             if(swap)
@@ -351,8 +373,8 @@ void Export()
     // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
     char path[] = "Data\\DummyData.csv";
 
-    // Buffer untuk menampung isi file saat proses copy berlangsung.
-    char buffer[1024];
+    // Variabel untuk menampung isi file (per line/baris) saat proses copy berlangsung nanti.
+    char line[1024];
 
     // Perintah sekaligus tempat input user dalam memasukkan nama file yang akan dibuat.
     printf("File name: ");
@@ -368,6 +390,7 @@ void Export()
         return;
     }
 
+    // NOTE! File akan disimpan dalam folder bernama "Data".
     // Membuat path file yang akan digunakan untuk menampung data hasil ekspor.
     char pathExport[100] = "Data\\";
     // Gabungkan path dengan nama file yang diinput user serta tambahkan ekstensi .csv dibelakangnya.
@@ -385,8 +408,8 @@ void Export()
     }
 
     // Copy seluruh isi file dan masukkan data dari file sumber ke file yang baru dibuat.
-    while(fgets(buffer, sizeof(buffer), file1))
-        fputs(buffer, file2);
+    while(fgets(line, sizeof(line), file1))
+        fputs(line, file2);
 
     // Tutup kedua file (sumber dan file yang dibuat) setelah proses copy selesai.
     fclose(file1);
