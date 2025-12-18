@@ -64,7 +64,6 @@ int main()												// Main function.
             
             default:									// Jika ada input selain 1-5.
                 printf("Option invalid.\n");			// Tampilkan option invalid.
-                option = 0;								// Kembalikan option ke 0 supaya do while tetap berjalan.
         }
     }
     
@@ -208,7 +207,7 @@ void SelectRow()
             target = prop.furnish;
 
         // Jika targetnya memang ada dan data yang ditarget itu susuai dengan data yang diminta user maka lanjutkan.
-        if((target && strcmp(target, data) == 0) || (targetInt && targetInt == atoi(data)))
+        if((target && strcmp(target, data) == 0) || (targetInt == atoi(data)))
         {
             // Karena data sudah ditemukan belum dilabelkan sebagai "ditemukan", maka tampilkan judulnya terlebih dahulu. Hal ini dilakukan agar judul tidak terus menerus ditampilkan setiap kali data ditemukan.
             if(!found)
