@@ -76,12 +76,41 @@ void Display()
     // Variabel untuk menampung jumlah row yang harus ditampilkan.
     int rows;
 
-    // Perintah sekaligus tempat input user dalam memasukkan nilai jumlah row.
-    printf("Number of rows: ");
-    scanf("%d", &rows);
+    // Berfungsi untuk memvalidasi apakah input rows-nya sesuai ketentuan atau tidak.
+    while (1)
+    {
+        printf("Number of rows: ");
 
-    // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char path[] = "Data\\DummyData.csv";
+        // Jika inputnya berupa huruf/kalimat.
+        if (scanf("%d", &rows) != 1)
+        {
+            printf("Invalid input. Please enter a number.\n");
+
+            // Clear buffer inputnya.
+            while (getchar() != '\n');
+            // Ulangi loopnya.
+            continue;
+        }
+
+        // Jika inputnya kurang atau sama dengan 0.
+        if (rows <= 0)
+        {
+            printf("Number of rows must be greater than 0.\n");
+
+            // Clear buffer inputnya.
+            while (getchar() != '\n');
+            // Ulangi loopnya.
+            continue;
+        }
+
+        // Clear buffer inputnya jika sesuai dengan ketentuan.
+        while (getchar() != '\n');
+        // Matikan loopnya.
+        break;
+    }
+
+    // Variabel yang menyimpan path file data csv.
+    char path[] = "DummyData.csv";
 
     // Membuka file dengan fungsi fopen yang merujuk pada path data dengan mode akses "r" atau "read".
     FILE *file = fopen(path, "r");
@@ -94,7 +123,7 @@ void Display()
     }
     
     // Satu baris yang akan kita ambil dalam scanning baris nanti.
-    char line[1024];
+    char line[1000];
     // Variabel count digunakan untuk menghitung berapa baris yang sudah ditampilkan, nanti akan dicocokkan dengan rows yang sudah di input.
     int count = 0;
 
@@ -150,8 +179,8 @@ void SelectRow()
     printf("What data do you want to find? ");
     scanf("%s", data);
 
-    // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char path[] = "Data\\DummyData.csv";
+    // Variabel yang menyimpan path file data csv.
+    char path[] = "DummyData.csv";
 
     // Membuka file dengan fungsi fopen yang merujuk pada path data dengan mode akses "r" atau "read".
     FILE *file = fopen(path, "r");
@@ -164,7 +193,7 @@ void SelectRow()
     }
 
     // Satu baris yang akan kita ambil dalam scanning baris nanti.
-    char line[1024];
+    char line[1000];
     // Variabel yang berguna untuk menyimpan nilai boolean terkait apakah data berhasil ditemukan.
     int found = 0;
 
@@ -181,8 +210,8 @@ void SelectRow()
         Property prop;
         // Membuat variabel target data, defaultnya adalah NULL atau tidak ada.
         char *target = NULL;
-        // Membuat variabel target data namun kali ini untuk tipe data integer, defaultnya adalah 0.
-        int targetInt = 0;
+        // Membuat variabel target data namun kali ini untuk tipe data integer, defaultnya adalah -1.
+        int targetInt = -1;
 
         // Melakukan scanning data yang ada di file csv. Data dipecah/dipisahkan berdasarkan koma (sesuai format yang ada di dalam file csv). Kemudian data akan dipassing ke variabel yang diinisialisasi di dalam struct.
         sscanf(line, "%[^,],%[^,],%d,%d,%d,%d,%[^,],%s", prop.location, prop.city, &prop.price, &prop.rooms, &prop.bathrooms, &prop.carpark, prop.type, prop.furnish);
@@ -207,9 +236,9 @@ void SelectRow()
             target = prop.furnish;
 
         // Jika targetnya memang ada dan data yang ditarget itu susuai dengan data yang diminta user maka lanjutkan.
-        if((target && strcmp(target, data) == 0) || (targetInt == atoi(data)))
+        if((target && strcmp(target, data) == 0) || (targetInt && targetInt == atoi(data)))
         {
-            // Karena data sudah ditemukan belum dilabelkan sebagai "ditemukan", maka tampilkan judulnya terlebih dahulu. Hal ini dilakukan agar judul tidak terus menerus ditampilkan setiap kali data ditemukan.
+            // Karena data sudah ditemukan namun belum dilabelkan sebagai "ditemukan", maka tampilkan judulnya terlebih dahulu. Hal ini dilakukan agar judul tidak terus menerus ditampilkan setiap kali data ditemukan.
             if(!found)
             {
                 // Tampilkan judul dan header sebagai bentuk format tabel.
@@ -259,8 +288,8 @@ void SortBy()
     printf("Sort ascending or descending?: ");
     scanf("%s", order);
 
-    // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char path[] = "Data\\DummyData.csv";
+    // Variabel yang menyimpan path file data csv.
+    char path[] = "DummyData.csv";
 
     // Membuka file dengan fungsi fopen yang merujuk pada path data dengan mode akses "r" atau "read".
     FILE *file = fopen(path, "r");
@@ -280,7 +309,7 @@ void SortBy()
     int n = 0;
 
     // Satu baris yang akan kita ambil dalam scanning baris nanti.
-    char line[1024];
+    char line[1000];
 
     // FIX!! Metode yang berguna untuk tidak mengambil header yang ada dalam file csv! (KALAU DIHAPUS HEADER AKAN DIPRINT DAN OUTPUT BISA KACAU).
     fgets(line, sizeof(line), file);
@@ -369,11 +398,11 @@ void Export()
     // Variabel untuk menampung nama file yang akan dibuat.
     char filename[100];
 
-    // Variabel yang menyimpan path file data csv yang ada di dalam folder "Data" (Data/DummyData.csv).
-    char path[] = "Data\\DummyData.csv";
+    // Variabel yang menyimpan path file data csv.
+    char path[] = "DummyData.csv";
 
     // Variabel untuk menampung isi file (per line/baris) saat proses copy berlangsung nanti.
-    char line[1024];
+    char line[1000];
 
     // Perintah sekaligus tempat input user dalam memasukkan nama file yang akan dibuat.
     printf("File name: ");
@@ -389,14 +418,11 @@ void Export()
         return;
     }
 
-    // NOTE! File akan disimpan dalam folder bernama "Data".
-    // Membuat path file yang akan digunakan untuk menampung data hasil ekspor.
-    char pathExport[100] = "Data\\";
-    // Gabungkan path dengan nama file yang diinput user serta tambahkan ekstensi .csv dibelakangnya.
-    sprintf(pathExport, "Data\\%s.csv", filename);
+    // Menambahkan eksensi file .csv terhadap file name yang diinput user.
+    strcat(filename, ".csv");
 
     // Buka/membuat file yang dibuat untuk ditulis menggunakan access mode "w" atau "write".
-    FILE *file2 = fopen(pathExport, "w");
+    FILE *file2 = fopen(filename, "w");
 
     // Jika file tidak dapat dibuat maka beri pesan error dan tutup file sumber.
     if(file2 == NULL)
@@ -414,7 +440,7 @@ void Export()
     fclose(file1);
     fclose(file2);
 
-    printf("Data successfully written to file %s.csv!\n\n", filename);
+    printf("Data successfully written to file %s!\n\n", filename);
 
     // Pause sebelum kembali ke menu utama.
     printf("Press Enter to return to main menu...");
